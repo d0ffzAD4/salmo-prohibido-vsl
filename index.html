@@ -422,12 +422,6 @@
       <h1 style="font-family:var(--serif);font-size:26px;font-weight:600;text-align:center;color:var(--accent);margin:24px 0 10px;line-height:1.25;">Felicidades, Tu Alma Ha Sido Aprobada</h1>
       <p style="font-family:var(--sans);font-size:16px;text-align:center;color:var(--text);margin:0 auto 22px;max-width:400px;line-height:1.45;opacity:.9;">Escucha ahora lo que te falta para liberarte de las cadenas de la escasez</p>
       <vturb-smartplayer id="vid-6a2dd817523d570c096dad37" style="display: block; margin: 0 auto; width: 100%; max-width: 400px;"></vturb-smartplayer>
-      <script type="text/javascript">
-        var s=document.createElement("script");
-        s.src="https://scripts.converteai.net/ce326748-7ad9-45d3-b1c0-ccc0fba77476/players/6a2dd817523d570c096dad37/v4/player.js";
-        s.async=!0;
-        document.head.appendChild(s);
-      </script>
     </section>
 
   </div>
@@ -512,6 +506,16 @@
     const backBtn = document.getElementById('backBtn');
     const screens = document.querySelectorAll('.screen');
 
+    let vturbLoaded = false;
+    function loadVturbPlayer() {
+      if (vturbLoaded) return;
+      vturbLoaded = true;
+      const s = document.createElement('script');
+      s.src = 'https://scripts.converteai.net/ce326748-7ad9-45d3-b1c0-ccc0fba77476/players/6a2dd817523d570c096dad37/v4/player.js';
+      s.async = true;
+      document.head.appendChild(s);
+    }
+
     function showScreen(n) {
       currentScreen = n;
       screens.forEach(s => s.classList.toggle('active', parseInt(s.dataset.screen) === n));
@@ -521,6 +525,7 @@
       backBtn.disabled = (n === 1 || n === 14 || n === 15);
       window.scrollTo({ top: 0, behavior: 'instant' });
       applyAdaptations(n);
+      if (n === 15) loadVturbPlayer();
     }
 
     function next() { if (currentScreen < TOTAL_SCREENS) showScreen(currentScreen + 1); }
