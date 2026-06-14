@@ -1,669 +1,260 @@
 <!DOCTYPE html>
-<html lang="es">
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>La Prueba de la Prosperidad</title>
+ <html lang="es"> <head> <meta charset="UTF-8" /> <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" /> <title>La Prueba de la Prosperidad</title> <!-- Preconnect para fontes --> <link rel="preconnect" href="https://fonts.googleapis.com"> <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> <!-- Preload das imagens da tela 1 (aparecem imediatamente) --> <link rel="preload" as="image" href="images/hombre.webp"> <link rel="preload" as="image" href="images/mujer.webp"> <!-- Fontes com display=swap (não bloqueia renderização) --> <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"> <style> /* ============ RESET ============ */ *,*::before,*::after{box-sizing:border-box;margin:0;padding:0} html,body{height:100%} button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit} /* ============ DESIGN TOKENS ============ */ :root { --bg: #2e1808; --bg-soft: #3a1f0a; --card: #4a2a12; --card-hover: #5a3418; --border: #6b4220; --accent: #c89020; --accent-hover: #d9a030; --accent-soft: #8a5e15; --gold-glow: rgba(200,144,32,0.4); --text: #f5e9d4; --text-dim: #d4c4a8; --text-faded: #a89478; --highlight-bg: #c89020; --highlight-text: #2a1505; --warning: #e63946; --shadow: 0 12px 32px rgba(0,0,0,0.5); --serif: 'Lora','Georgia',serif; --sans: 'Inter',-apple-system,BlinkMacSystemFont,sans-serif; } /* ============ BASE ============ */ body { background: var(--bg); background-image: radial-gradient(ellipse at top,rgba(200,144,32,0.08) 0%,transparent 50%), radial-gradient(ellipse at bottom,rgba(0,0,0,0.4) 0%,transparent 60%); color: var(--text); font-family: var(--sans); line-height: 1.5; -webkit-font-smoothing: antialiased; overflow-x: hidden; } body::before { content:'';position:fixed;inset:0; background:radial-gradient(ellipse at center,transparent 50%,rgba(0,0,0,0.35) 100%); pointer-events:none;z-index:1; } .app { max-width:480px;margin:0 auto;min-height:100vh;min-height:100dvh; display:flex;flex-direction:column;position:relative;z-index:2; } /* ============ HEADER ============ */ .header{padding:14px 20px 0;display:flex;flex-direction:column;gap:10px} .back-btn{width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:var(--text);font-size:22px;opacity:.9;transition:opacity .2s} .back-btn:hover{opacity:1} .back-btn:disabled{opacity:0;pointer-events:none} .progress{height:6px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden;position:relative} .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent-soft) 0%,var(--accent) 100%);border-radius:99px;width:0%;transition:width .5s cubic-bezier(.4,0,.2,1);box-shadow:0 0 8px var(--gold-glow)} /* ============ SCREEN ============ */ .screen{flex:1;padding:28px 22px 24px;display:none;flex-direction:column;animation:fadeIn .45s ease-out} .screen.active{display:flex} @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}} /* ============ TYPOGRAPHY ============ */ .question{font-family:var(--serif);font-size:24px;font-weight:600;text-align:center;line-height:1.3;margin-bottom:26px;padding:0 6px;letter-spacing:.1px} .question-sub{font-family:var(--serif);font-size:19px;font-weight:500;font-style:italic;text-align:center;margin-top:-16px;margin-bottom:26px;color:var(--text-dim);line-height:1.35} .ornament{text-align:center;color:var(--accent);font-size:14px;letter-spacing:8px;margin-bottom:14px;opacity:.85} .hl{background:var(--highlight-bg);color:var(--highlight-text);padding:1px 8px;border-radius:3px;font-weight:600;font-style:normal} .spacer-top{flex:.7;min-height:24px} .spacer-bottom{flex:1} /* ============ OPTIONS ============ */ .options{display:flex;flex-direction:column;gap:11px} .opt{width:100%;background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:16px 18px;text-align:left;color:var(--text);font-family:var(--sans);font-size:15px;font-weight:500;line-height:1.35;transition:all .18s ease;display:flex;align-items:center;gap:12px} .opt:hover{background:var(--card-hover);border-color:var(--accent-soft)} .opt:active{transform:scale(.985)} .opt.selected{border-color:var(--accent);background:var(--card-hover);box-shadow:0 0 0 1px var(--accent),0 0 20px rgba(200,144,32,.2)} .opt .icon{font-size:22px;flex-shrink:0} .opt .arrow{margin-left:auto;color:var(--accent);font-size:18px;opacity:.7} /* Micro-feedback */ .micro-feedback{position:fixed;bottom:40px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(46,24,8,.95);backdrop-filter:blur(8px);border:1px solid var(--accent-soft);color:var(--text);padding:12px 22px;border-radius:99px;font-family:var(--serif);font-style:italic;font-size:16px;opacity:0;pointer-events:none;transition:all .3s ease;z-index:100;max-width:90%;text-align:center} .micro-feedback.show{opacity:1;transform:translateX(-50%) translateY(0)} /* Grid */ .opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px} /* Image cards */ .opt-card{background:var(--card);border:1.5px solid var(--border);border-radius:16px;overflow:hidden;cursor:pointer;transition:all .25s;display:flex;flex-direction:column} .opt-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:var(--shadow)} .opt-card-img{aspect-ratio:1/1;background:#2a1505;background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;color:var(--text-faded);font-size:11px;text-align:center;padding:8px} .opt-card-label{padding:14px 16px;font-family:var(--serif);font-weight:600;font-size:18px} /* Multi-select */ .opt-check{width:100%;background:var(--card);border:1.5px solid var(--border);border-radius:12px;padding:14px;text-align:left;color:var(--text);font-size:14px;font-weight:500;line-height:1.3;display:flex;align-items:center;gap:10px;transition:all .18s} .opt-check:hover{background:var(--card-hover)} .opt-check.selected{border-color:var(--accent);background:var(--card-hover)} .checkbox{width:18px;height:18px;border:1.5px solid var(--border);border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .18s} .opt-check.selected .checkbox{background:var(--accent);border-color:var(--accent)} .opt-check.selected .checkbox::after{content:'✓';color:var(--highlight-text);font-size:12px;font-weight:800} /* ============ TRANSITION ============ */ .transition{text-align:center} .transition-img{width:240px;height:240px;margin:0 auto 26px;border-radius:22px;background:#2a1505;background-size:cover;background-position:center;box-shadow:var(--shadow),0 0 40px rgba(200,144,32,.15);display:flex;align-items:center;justify-content:center;color:var(--text-faded);font-size:11px;padding:12px;position:relative} .transition-img::after{content:'';position:absolute;inset:0;border-radius:22px;box-shadow:inset 0 0 30px rgba(0,0,0,.4);pointer-events:none} .transition-text{font-family:var(--serif);font-size:22px;font-weight:500;line-height:1.4;margin-bottom:14px;padding:0 8px} .transition-text b{font-weight:700;color:var(--accent-hover)} .transition-sub{font-family:var(--serif);font-style:italic;font-size:17px;color:var(--text-dim);margin-bottom:28px;padding:0 12px;line-height:1.4} .quoted-answer{display:inline-block;color:var(--accent-hover);font-style:italic;border-bottom:1px solid var(--accent-soft);padding-bottom:1px} /* Alert */ .alert-banner{background:linear-gradient(90deg,#c5343f 0%,#e63946 100%);color:white;padding:14px 18px;border-radius:10px;font-family:var(--serif);font-weight:600;font-size:18px;text-align:center;margin-bottom:22px;box-shadow:0 4px 18px rgba(230,57,70,.35);letter-spacing:.3px} /* Diagnóstico */ .diagnosis{text-align:center;margin:14px 0 22px} .diagnosis-label{font-family:var(--sans);font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:6px;opacity:.85} .diagnosis-name{font-family:var(--serif);font-size:28px;font-weight:600;line-height:1.15;margin-bottom:12px;color:var(--accent-hover)} .diagnosis-desc{font-family:var(--serif);font-style:italic;font-size:17px;color:var(--text-dim);line-height:1.4;padding:0 8px} /* Notice */ .notice{text-align:center;font-family:var(--serif);font-size:18px;font-weight:500;line-height:1.45;margin-bottom:22px;padding:0 4px} /* ============ CTA ============ */ .cta{width:100%;background:linear-gradient(180deg,var(--accent-hover) 0%,var(--accent) 100%);color:white;font-family:var(--sans);font-size:16px;font-weight:700;padding:18px;border-radius:14px;transition:all .2s;box-shadow:0 6px 20px rgba(200,144,32,.3),inset 0 1px 0 rgba(255,255,255,.15);letter-spacing:.3px} .cta:hover{transform:translateY(-1px);box-shadow:0 8px 26px rgba(200,144,32,.45),inset 0 1px 0 rgba(255,255,255,.2)} .cta:active{transform:translateY(0)} .cta.pulse{animation:pulse 1.8s ease-in-out infinite} @keyframes pulse{0%,100%{box-shadow:0 6px 20px rgba(200,144,32,.3),inset 0 1px 0 rgba(255,255,255,.15)}50%{box-shadow:0 6px 30px rgba(200,144,32,.65),inset 0 1px 0 rgba(255,255,255,.25)}} .cta-muted{background:linear-gradient(180deg,#a8761a 0%,#8a5e15 100%)} /* ============ RITUAL ============ */ .ritual{text-align:center;padding:40px 20px} .ritual-symbol{font-family:var(--serif);font-size:64px;color:var(--accent);margin-bottom:24px;animation:rotate 8s linear infinite,glow 2s ease-in-out infinite;display:inline-block} @keyframes rotate{from{transform:rotate(0deg)}to{transform:rotate(360deg)}} @keyframes glow{0%,100%{text-shadow:0 0 20px rgba(200,144,32,.4)}50%{text-shadow:0 0 40px rgba(200,144,32,.9),0 0 60px rgba(200,144,32,.5)}} .ritual-title{font-family:var(--serif);font-size:24px;font-weight:600;margin-bottom:8px;color:var(--accent-hover);letter-spacing:1px} .ritual-status{font-family:var(--serif);font-style:italic;font-size:18px;color:var(--text-dim);min-height:56px;line-height:1.4;padding:0 12px;transition:opacity .4s} .ritual-progress{width:80%;max-width:280px;height:4px;background:rgba(255,255,255,.08);border-radius:99px;margin:28px auto 0;overflow:hidden} .ritual-progress-fill{height:100%;background:var(--accent);width:0%;box-shadow:0 0 12px var(--gold-glow);transition:width .3s linear} /* ============ FINAL ============ */ .final{text-align:center;padding-top:8px} .final-ornament{font-size:24px;color:var(--accent);margin-bottom:18px;letter-spacing:12px;opacity:.9} .final-heading{font-family:var(--serif);font-size:28px;font-weight:600;line-height:1.2;margin-bottom:20px;color:var(--text)} .final-body{font-family:var(--serif);font-size:19px;font-style:italic;line-height:1.55;color:var(--text-dim);margin-bottom:18px;padding:0 4px} .final-body p{margin-bottom:14px} .final-body b{font-style:normal;font-weight:600;color:var(--accent-hover)} .final-divider{width:60px;height:1px;background:var(--accent-soft);margin:24px auto;opacity:.6} .final-verdict{font-family:var(--serif);font-size:21px;font-weight:600;color:var(--accent-hover);margin-bottom:28px;line-height:1.3} .final-fineprint{font-family:var(--sans);font-size:12px;color:var(--text-faded);margin-top:14px;letter-spacing:.5px} .final-image{width:100%;max-width:280px;aspect-ratio:4/5;margin:0 auto 22px;border-radius:14px;overflow:hidden;position:relative;box-shadow:0 20px 50px rgba(0,0,0,.6),0 0 60px rgba(200,144,32,.25),inset 0 0 0 1px rgba(200,144,32,.3)} .final-image img{width:100%;height:100%;object-fit:cover;display:block} .final-image::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 40%,rgba(46,24,8,.5) 100%);pointer-events:none} .final-caption{font-family:var(--serif);font-style:italic;font-size:14px;color:var(--text-faded);margin-top:-14px;margin-bottom:22px;letter-spacing:.5px} </style> </head> <body> <div class="app"> 
 
-  <!-- Preconnect para fontes -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-  <!-- Preload das imagens da tela 1 (aparecem imediatamente) -->
-  <link rel="preload" as="image" href="images/hombre.webp">
-  <link rel="preload" as="image" href="images/mujer.webp">
-
-  <!-- Fontes com display=swap (não bloqueia renderização) -->
-  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-  <style>
-    /* ============ RESET ============ */
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    html,body{height:100%}
-    button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
-
-    /* ============ DESIGN TOKENS ============ */
-    :root {
-      --bg: #2e1808;
-      --bg-soft: #3a1f0a;
-      --card: #4a2a12;
-      --card-hover: #5a3418;
-      --border: #6b4220;
-      --accent: #c89020;
-      --accent-hover: #d9a030;
-      --accent-soft: #8a5e15;
-      --gold-glow: rgba(200,144,32,0.4);
-      --text: #f5e9d4;
-      --text-dim: #d4c4a8;
-      --text-faded: #a89478;
-      --highlight-bg: #c89020;
-      --highlight-text: #2a1505;
-      --warning: #e63946;
-      --shadow: 0 12px 32px rgba(0,0,0,0.5);
-      --serif: 'Lora','Georgia',serif;
-      --sans: 'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
-    }
-
-    /* ============ BASE ============ */
-    body {
-      background: var(--bg);
-      background-image:
-        radial-gradient(ellipse at top,rgba(200,144,32,0.08) 0%,transparent 50%),
-        radial-gradient(ellipse at bottom,rgba(0,0,0,0.4) 0%,transparent 60%);
-      color: var(--text);
-      font-family: var(--sans);
-      line-height: 1.5;
-      -webkit-font-smoothing: antialiased;
-      overflow-x: hidden;
-    }
-    body::before {
-      content:'';position:fixed;inset:0;
-      background:radial-gradient(ellipse at center,transparent 50%,rgba(0,0,0,0.35) 100%);
-      pointer-events:none;z-index:1;
-    }
-    .app {
-      max-width:480px;margin:0 auto;min-height:100vh;min-height:100dvh;
-      display:flex;flex-direction:column;position:relative;z-index:2;
-    }
-
-    /* ============ HEADER ============ */
-    .header{padding:14px 20px 0;display:flex;flex-direction:column;gap:10px}
-    .back-btn{width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:var(--text);font-size:22px;opacity:.9;transition:opacity .2s}
-    .back-btn:hover{opacity:1}
-    .back-btn:disabled{opacity:0;pointer-events:none}
-    .progress{height:6px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden;position:relative}
-    .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent-soft) 0%,var(--accent) 100%);border-radius:99px;width:0%;transition:width .5s cubic-bezier(.4,0,.2,1);box-shadow:0 0 8px var(--gold-glow)}
-
-    /* ============ SCREEN ============ */
-    .screen{flex:1;padding:28px 22px 24px;display:none;flex-direction:column;animation:fadeIn .45s ease-out}
-    .screen.active{display:flex}
-    @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-
-    /* ============ TYPOGRAPHY ============ */
-    .question{font-family:var(--serif);font-size:24px;font-weight:600;text-align:center;line-height:1.3;margin-bottom:26px;padding:0 6px;letter-spacing:.1px}
-    .question-sub{font-family:var(--serif);font-size:19px;font-weight:500;font-style:italic;text-align:center;margin-top:-16px;margin-bottom:26px;color:var(--text-dim);line-height:1.35}
-    .ornament{text-align:center;color:var(--accent);font-size:14px;letter-spacing:8px;margin-bottom:14px;opacity:.85}
-    .hl{background:var(--highlight-bg);color:var(--highlight-text);padding:1px 8px;border-radius:3px;font-weight:600;font-style:normal}
-    .spacer-top{flex:.7;min-height:24px}
-    .spacer-bottom{flex:1}
-
-    /* ============ OPTIONS ============ */
-    .options{display:flex;flex-direction:column;gap:11px}
-    .opt{width:100%;background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:16px 18px;text-align:left;color:var(--text);font-family:var(--sans);font-size:15px;font-weight:500;line-height:1.35;transition:all .18s ease;display:flex;align-items:center;gap:12px}
-    .opt:hover{background:var(--card-hover);border-color:var(--accent-soft)}
-    .opt:active{transform:scale(.985)}
-    .opt.selected{border-color:var(--accent);background:var(--card-hover);box-shadow:0 0 0 1px var(--accent),0 0 20px rgba(200,144,32,.2)}
-    .opt .icon{font-size:22px;flex-shrink:0}
-    .opt .arrow{margin-left:auto;color:var(--accent);font-size:18px;opacity:.7}
-
-    /* Micro-feedback */
-    .micro-feedback{position:fixed;bottom:40px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(46,24,8,.95);backdrop-filter:blur(8px);border:1px solid var(--accent-soft);color:var(--text);padding:12px 22px;border-radius:99px;font-family:var(--serif);font-style:italic;font-size:16px;opacity:0;pointer-events:none;transition:all .3s ease;z-index:100;max-width:90%;text-align:center}
-    .micro-feedback.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
-    /* Grid */
-    .opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-
-    /* Image cards */
-    .opt-card{background:var(--card);border:1.5px solid var(--border);border-radius:16px;overflow:hidden;cursor:pointer;transition:all .25s;display:flex;flex-direction:column}
-    .opt-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:var(--shadow)}
-    .opt-card-img{aspect-ratio:1/1;background:#2a1505;background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;color:var(--text-faded);font-size:11px;text-align:center;padding:8px}
-    .opt-card-label{padding:14px 16px;font-family:var(--serif);font-weight:600;font-size:18px}
-
-    /* Multi-select */
-    .opt-check{width:100%;background:var(--card);border:1.5px solid var(--border);border-radius:12px;padding:14px;text-align:left;color:var(--text);font-size:14px;font-weight:500;line-height:1.3;display:flex;align-items:center;gap:10px;transition:all .18s}
-    .opt-check:hover{background:var(--card-hover)}
-    .opt-check.selected{border-color:var(--accent);background:var(--card-hover)}
-    .checkbox{width:18px;height:18px;border:1.5px solid var(--border);border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .18s}
-    .opt-check.selected .checkbox{background:var(--accent);border-color:var(--accent)}
-    .opt-check.selected .checkbox::after{content:'✓';color:var(--highlight-text);font-size:12px;font-weight:800}
-
-    /* ============ TRANSITION ============ */
-    .transition{text-align:center}
-    .transition-img{width:240px;height:240px;margin:0 auto 26px;border-radius:22px;background:#2a1505;background-size:cover;background-position:center;box-shadow:var(--shadow),0 0 40px rgba(200,144,32,.15);display:flex;align-items:center;justify-content:center;color:var(--text-faded);font-size:11px;padding:12px;position:relative}
-    .transition-img::after{content:'';position:absolute;inset:0;border-radius:22px;box-shadow:inset 0 0 30px rgba(0,0,0,.4);pointer-events:none}
-    .transition-text{font-family:var(--serif);font-size:22px;font-weight:500;line-height:1.4;margin-bottom:14px;padding:0 8px}
-    .transition-text b{font-weight:700;color:var(--accent-hover)}
-    .transition-sub{font-family:var(--serif);font-style:italic;font-size:17px;color:var(--text-dim);margin-bottom:28px;padding:0 12px;line-height:1.4}
-    .quoted-answer{display:inline-block;color:var(--accent-hover);font-style:italic;border-bottom:1px solid var(--accent-soft);padding-bottom:1px}
-
-    /* Alert */
-    .alert-banner{background:linear-gradient(90deg,#c5343f 0%,#e63946 100%);color:white;padding:14px 18px;border-radius:10px;font-family:var(--serif);font-weight:600;font-size:18px;text-align:center;margin-bottom:22px;box-shadow:0 4px 18px rgba(230,57,70,.35);letter-spacing:.3px}
-
-    /* Diagnóstico */
-    .diagnosis{text-align:center;margin:14px 0 22px}
-    .diagnosis-label{font-family:var(--sans);font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:6px;opacity:.85}
-    .diagnosis-name{font-family:var(--serif);font-size:28px;font-weight:600;line-height:1.15;margin-bottom:12px;color:var(--accent-hover)}
-    .diagnosis-desc{font-family:var(--serif);font-style:italic;font-size:17px;color:var(--text-dim);line-height:1.4;padding:0 8px}
-
-    /* Notice */
-    .notice{text-align:center;font-family:var(--serif);font-size:18px;font-weight:500;line-height:1.45;margin-bottom:22px;padding:0 4px}
-
-    /* ============ CTA ============ */
-    .cta{width:100%;background:linear-gradient(180deg,var(--accent-hover) 0%,var(--accent) 100%);color:white;font-family:var(--sans);font-size:16px;font-weight:700;padding:18px;border-radius:14px;transition:all .2s;box-shadow:0 6px 20px rgba(200,144,32,.3),inset 0 1px 0 rgba(255,255,255,.15);letter-spacing:.3px}
-    .cta:hover{transform:translateY(-1px);box-shadow:0 8px 26px rgba(200,144,32,.45),inset 0 1px 0 rgba(255,255,255,.2)}
-    .cta:active{transform:translateY(0)}
-    .cta.pulse{animation:pulse 1.8s ease-in-out infinite}
-    @keyframes pulse{0%,100%{box-shadow:0 6px 20px rgba(200,144,32,.3),inset 0 1px 0 rgba(255,255,255,.15)}50%{box-shadow:0 6px 30px rgba(200,144,32,.65),inset 0 1px 0 rgba(255,255,255,.25)}}
-    .cta-muted{background:linear-gradient(180deg,#a8761a 0%,#8a5e15 100%)}
-
-    /* ============ RITUAL ============ */
-    .ritual{text-align:center;padding:40px 20px}
-    .ritual-symbol{font-family:var(--serif);font-size:64px;color:var(--accent);margin-bottom:24px;animation:rotate 8s linear infinite,glow 2s ease-in-out infinite;display:inline-block}
-    @keyframes rotate{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-    @keyframes glow{0%,100%{text-shadow:0 0 20px rgba(200,144,32,.4)}50%{text-shadow:0 0 40px rgba(200,144,32,.9),0 0 60px rgba(200,144,32,.5)}}
-    .ritual-title{font-family:var(--serif);font-size:24px;font-weight:600;margin-bottom:8px;color:var(--accent-hover);letter-spacing:1px}
-    .ritual-status{font-family:var(--serif);font-style:italic;font-size:18px;color:var(--text-dim);min-height:56px;line-height:1.4;padding:0 12px;transition:opacity .4s}
-    .ritual-progress{width:80%;max-width:280px;height:4px;background:rgba(255,255,255,.08);border-radius:99px;margin:28px auto 0;overflow:hidden}
-    .ritual-progress-fill{height:100%;background:var(--accent);width:0%;box-shadow:0 0 12px var(--gold-glow);transition:width .3s linear}
-
-    /* ============ FINAL ============ */
-    .final{text-align:center;padding-top:8px}
-    .final-ornament{font-size:24px;color:var(--accent);margin-bottom:18px;letter-spacing:12px;opacity:.9}
-    .final-heading{font-family:var(--serif);font-size:28px;font-weight:600;line-height:1.2;margin-bottom:20px;color:var(--text)}
-    .final-body{font-family:var(--serif);font-size:19px;font-style:italic;line-height:1.55;color:var(--text-dim);margin-bottom:18px;padding:0 4px}
-    .final-body p{margin-bottom:14px}
-    .final-body b{font-style:normal;font-weight:600;color:var(--accent-hover)}
-    .final-divider{width:60px;height:1px;background:var(--accent-soft);margin:24px auto;opacity:.6}
-    .final-verdict{font-family:var(--serif);font-size:21px;font-weight:600;color:var(--accent-hover);margin-bottom:28px;line-height:1.3}
-    .final-fineprint{font-family:var(--sans);font-size:12px;color:var(--text-faded);margin-top:14px;letter-spacing:.5px}
-    .final-image{width:100%;max-width:280px;aspect-ratio:4/5;margin:0 auto 22px;border-radius:14px;overflow:hidden;position:relative;box-shadow:0 20px 50px rgba(0,0,0,.6),0 0 60px rgba(200,144,32,.25),inset 0 0 0 1px rgba(200,144,32,.3)}
-    .final-image img{width:100%;height:100%;object-fit:cover;display:block}
-    .final-image::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 40%,rgba(46,24,8,.5) 100%);pointer-events:none}
-    .final-caption{font-family:var(--serif);font-style:italic;font-size:14px;color:var(--text-faded);margin-top:-14px;margin-bottom:22px;letter-spacing:.5px}
-  </style>
-</head>
-
-<body>
-  <div class="app">
-
-    <div class="header">
-      <button class="back-btn" id="backBtn" aria-label="Voltar">←</button>
-      <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100">
-        <div class="progress-fill" id="progressFill"></div>
-      </div>
-    </div>
-
-    <!-- SCREEN 1 — GÉNERO -->
-    <section class="screen active" data-screen="1">
-      <div class="spacer-top"></div>
-      <div class="ornament">✦ · ✦</div>
-      <h1 class="question">Has sido convocado a la prueba de <span class="hl">la prosperidad</span></h1>
-      <p class="question-sub">Las palabras necesitan saber: tú eres…</p>
-      <div class="opt-grid">
-        <button class="opt-card" data-answer="hombre" data-label="Hombre">
-          <div class="opt-card-img" style="background-image:url('images/hombre.webp');"></div>
-          <div class="opt-card-label">Hombre</div>
-        </button>
-        <button class="opt-card" data-answer="mujer" data-label="Mujer">
-          <div class="opt-card-img" style="background-image:url('images/mujer.webp');"></div>
-          <div class="opt-card-label">Mujer</div>
-        </button>
-      </div>
-      <div class="spacer-bottom"></div>
-    </section>
-
-    <!-- SCREEN 2 — EDAD -->
-    <section class="screen" data-screen="2">
-      <div class="spacer-top"></div>
-      <h1 class="question">¿Cuál es tu edad?</h1>
-      <div class="options">
-        <button class="opt" data-answer="18-24" data-label="18–24 años">18–24</button>
-        <button class="opt" data-answer="25-34" data-label="25–34 años">25–34</button>
-        <button class="opt" data-answer="35-44" data-label="35–44 años">35–44</button>
-        <button class="opt" data-answer="45+" data-label="45 años o más">45+</button>
-      </div>
-      <div class="spacer-bottom"></div>
-    </section>
-
-    <!-- SCREEN 3 — DINERO -->
-    <section class="screen" data-screen="3">
-      <div class="spacer-top"></div>
-      <h1 class="question">Cuando el dinero entra en tu vida, ¿qué sucede inmediatamente después?</h1>
-      <div class="options">
-        <button class="opt" data-answer="prueba-gasto" data-label="aparece una prueba o un gasto inesperado">
-          <span class="icon">📖</span><span>Siempre aparece una prueba o un gasto inesperado</span>
-        </button>
-        <button class="opt" data-answer="desaparece" data-label="el dinero desaparece sin entender cómo">
-          <span class="icon">🕯️</span><span>Desaparece sin que logre entender cómo</span>
-        </button>
-        <button class="opt" data-answer="miedo-usar" data-label="permanece, pero sientes miedo de usarlo">
-          <span class="icon">🙌🏻</span><span>Permanece intacto, pero siento miedo de usarlo</span>
-        </button>
-        <button class="opt" data-answer="multiplica" data-label="el dinero se multiplica naturalmente">
-          <span class="icon">🙏🏼</span><span>Se multiplica de manera natural y armoniosa</span>
-        </button>
-      </div>
-      <div class="spacer-bottom"></div>
-    </section>
-
-    <!-- SCREEN 4 — LEY DE LA ATRACCIÓN -->
-    <section class="screen" data-screen="4">
-      <div class="spacer-top"></div>
-      <h1 class="question">¿Ya intentaste la Ley de la Atracción, el pensamiento positivo o la manifestación?</h1>
-      <div class="options">
-        <button class="opt" data-answer="nunca-funciono" data-label="lo intentaste varias veces sin éxito">Sí, varias veces y NUNCA funcionó bien</button>
-        <button class="opt" data-answer="temporales" data-label="los resultados fueron temporales">Lo intenté, pero los resultados fueron temporales</button>
-        <button class="opt" data-answer="nunca-intente" data-label="nunca lo intentaste seriamente">Nunca lo intenté seriamente</button>
-        <button class="opt" data-answer="funciono" data-label="funcionó perfectamente para ti">Funcionó perfectamente para mí</button>
-      </div>
-      <div class="spacer-bottom"></div>
-    </section>
-
-    <!-- SCREEN 5 — POR QUÉ ALGUIEN -->
-    <section class="screen" data-screen="5">
-      <div class="spacer-top"></div>
-      <h1 class="question">¿Alguna vez te has preguntado:</h1>
-      <p class="question-sub">"¿Por qué alguien que trabaja menos tiene más que yo?"</p>
-      <div class="options">
-        <button class="opt" data-answer="frustra" data-label="te frustra profundamente">Sí, eso me frustra profundamente</button>
-        <button class="opt" data-answer="a-veces" data-label="a veces lo piensas">A veces pienso en eso</button>
-        <button class="opt" data-answer="rara-vez" data-label="rara vez">Rara vez</button>
-        <button class="opt" data-answer="nunca" data-label="nunca">Nunca</button>
-      </div>
-      <div class="spacer-bottom"></div>
-    </section>
-
-    <!-- SCREEN 6 — TRANSITION -->
-    <section class="screen" data-screen="6">
-      <div class="spacer-top"></div>
-      <div class="transition">
-        <div class="ornament">✦</div>
-        <div class="transition-img" style="background-image:url('images/mercado.webp');"></div>
-        <p class="transition-text" id="screen6Text">
-          Tu respuesta — <span class="quoted-answer" id="screen6Quote">[…]</span> — no es casualidad.
-        </p>
-        <p class="transition-sub">Las personas que prosperan sin esfuerzo conocen <b style="color:var(--accent-hover);font-style:normal;">frecuencias</b> que la mayoría jamás escuchó.</p>
-        <button class="cta pulse" data-next>Continuar</button>
-      </div>
-      <div class="spacer-bottom"></div>
-    </section>
-
-    <!-- SCREEN 7 — CUANDO PIENSO EN DINERO -->
-    <section class="screen" data-screen="7">
-      <div class="spacer-top"></div>
-      <h1 class="question">Cuando piensas en tener mucho dinero, tú…</h1>
-      <div class="options">
-        <button class="opt" data-answer="no-merezco" data-label="sientes que no lo mereces">
-          <span class="icon">😟</span><span>Siento que no lo merezco o que no soy capaz</span>
-        </button>
-        <button class="opt" data-answer="ansioso" data-label="te pones ansioso(a) por perderlo">
-          <span class="icon">😳</span><span>Me pongo ansioso(a) y tengo miedo de perderlo</span>
-        </button>
-        <button class="opt" data-answer="culpable" data-label="te sientes culpable por desearlo">
-          <span class="icon">😔</span><span>Me siento culpable por desearlo</span>
-        </button>
-        <button class="opt" data-answer="mio" data-label="sabes que es tuyo por derecho">
-          <span class="icon">😌</span><span>Sé que es mío por derecho</span>
-        </button>
-      </div>
-      <div class="spacer-bottom"></div>
-    </section>
-
-    <!-- SCREEN 8 — DIAGNÓSTICO -->
-    <section class="screen" data-screen="8">
-      <div class="spacer-top"></div>
-      <div class="transition">
-        <div class="alert-banner">Tu respuesta reveló tu bloqueo principal</div>
-        <div class="transition-img" style="background-image:url('images/bloqueo.webp');"></div>
-        <div class="diagnosis">
-          <div class="diagnosis-label">Bloqueo identificado</div>
-          <div class="diagnosis-name" id="blockName">El Sello de la Indignidad</div>
-          <div class="diagnosis-desc" id="blockDesc">Una voz interior te repite que no eres digno. Las palabras existen para silenciarla.</div>
-        </div>
-        <button class="cta pulse" data-next>Continuar</button>
-      </div>
-      <div class="spacer-bottom"></div>
-    </section>
-
-    <!-- SCREEN 9 — SALMO -->
-    <section class="screen" data-screen="9">
-      <div class="spacer-top"></div>
-      <h1 class="question">¿Y si te dijera que una oración del salmo prohibido puede cambiar tu realidad financiera en 40 días?</h1>
-      <p class="question-sub" style="font-size:19px;">Tú…</p>
-      <div class="options">
-        <button class="opt" data-answer="inmediato" data-label="la intentarías de inmediato">
-          <span class="icon">🥳</span><span>La intentaría de inmediato</span>
-        </button>
-        <button class="opt" data-answer="curiosidad" data-label="sentirías mucha curiosidad">
-          <span class="icon">🥺</span><span>Sentiría mucha curiosidad por saber más</span>
-        </button>
-        <button class="opt" data-answer="entender" data-label="necesitarías entender cómo funciona primero">
-          <span class="icon">✨</span><span>Necesitaría entender primero cómo funciona</span>
-        </button>
-      </div>
-      <div class="spacer-bottom"></div>
-    </section>
-
-    <!-- SCREEN 10 — MAYOR DESEO -->
-    <section class="screen" data-screen="10">
-      <div class="spacer-top"></div>
-      <h1 class="question">¿Cuál es tu mayor deseo en este momento?</h1>
-      <div class="options">
-        <button class="opt" data-answer="deudas" data-label="pagar todas tus deudas">Pagar todas mis deudas</button>
-        <button class="opt" data-answer="emergencia" data-label="tener un fondo de emergencia">Tener un fondo de emergencia</button>
-        <button class="opt" data-answer="libertad" data-label="alcanzar la libertad financiera">Alcanzar la libertad financiera</button>
-        <button class="opt" data-answer="familia" data-label="ayudar a tu familia">Ayudar a mi familia</button>
-      </div>
-      <div class="spacer-bottom"></div>
-    </section>
-
-    <!-- SCREEN 11 — TRANSITION -->
-    <section class="screen" data-screen="11">
-      <div class="spacer-top"></div>
-      <div class="transition">
-        <div class="ornament">✦</div>
-        <div class="transition-img" style="background-image:url('images/palabras.webp');"></div>
-        <p class="transition-text">Las <b>palabras</b> reconocen a quien las puede portar.</p>
-        <p class="transition-sub" id="screen11Sub">Y reconocen tu deseo: <span class="quoted-answer" id="screen11Quote">[…]</span>.</p>
-        <button class="cta pulse" data-next>Continuar</button>
-      </div>
-      <div class="spacer-bottom"></div>
-    </section>
-
-    <!-- SCREEN 12 — MULTI-SELECT -->
-    <section class="screen" data-screen="12">
-      <h1 class="question" style="margin-top:14px;">Marca lo que más deseas manifestar en los próximos 30 días:</h1>
-      <p class="question-sub" style="font-style:normal;font-size:13px;font-family:var(--sans);color:var(--text-faded);letter-spacing:1px;">(SELECCIÓN MÚLTIPLE)</p>
-      <div class="opt-grid" id="multiGrid">
-        <button class="opt-check" data-value="abundancia"><span class="checkbox"></span><span>Abundancia financiera</span></button>
-        <button class="opt-check" data-value="paz"><span class="checkbox"></span><span>Paz interior</span></button>
-        <button class="opt-check" data-value="alegria"><span class="checkbox"></span><span>Alegría</span></button>
-        <button class="opt-check" data-value="motivacion"><span class="checkbox"></span><span>Motivación</span></button>
-        <button class="opt-check" data-value="confianza"><span class="checkbox"></span><span>Confianza</span></button>
-        <button class="opt-check" data-value="relaciones"><span class="checkbox"></span><span>Relaciones saludables</span></button>
-        <button class="opt-check" data-value="proposito"><span class="checkbox"></span><span>Propósito</span></button>
-        <button class="opt-check" data-value="gratitud"><span class="checkbox"></span><span>Gratitud</span></button>
-        <button class="opt-check" data-value="claridad"><span class="checkbox"></span><span>Claridad mental</span></button>
-        <button class="opt-check" data-value="positivos"><span class="checkbox"></span><span>Pensamientos positivos</span></button>
-        <button class="opt-check" data-value="salud"><span class="checkbox"></span><span>Salud física</span></button>
-        <button class="opt-check" data-value="enfoque"><span class="checkbox"></span><span>Enfoque</span></button>
-        <button class="opt-check" data-value="evolucion"><span class="checkbox"></span><span>Evolución personal</span></button>
-        <button class="opt-check" data-value="productividad"><span class="checkbox"></span><span>Productividad</span></button>
-        <button class="opt-check" data-value="manifestacion"><span class="checkbox"></span><span>Manifestación de deseos</span></button>
-        <button class="opt-check" data-value="paciencia"><span class="checkbox"></span><span>Paciencia</span></button>
-      </div>
-      <button class="cta cta-muted" id="multiNext" style="margin-top:18px;">Continuar</button>
-    </section>
-
-    <!-- SCREEN 13 — COMPROMISO -->
-    <section class="screen" data-screen="13">
-      <div class="spacer-top"></div>
-      <p class="notice"><span class="hl">Aviso:</span> las palabras tienen conciencia propia. Pueden volverse contra quien las utiliza con mala intención.</p>
-      <div class="transition-img" style="background-image:url('images/torah.webp');margin:0 auto 22px;"></div>
-      <h1 class="question" style="font-size:22px;">¿Te comprometes a usar este poder únicamente con propósitos nobles?</h1>
-      <div class="options">
-        <button class="opt" data-answer="si-comprometo" data-label="te comprometiste completamente">
-          <span class="icon">🙏🏼</span><span>Sí, me comprometo completamente</span><span class="arrow">›</span>
-        </button>
-        <button class="opt" data-answer="no-garantizo" data-label="no pudiste garantizarlo">
-          <span class="icon">🙌</span><span>No puedo garantizarlo</span><span class="arrow">›</span>
-        </button>
-      </div>
-      <div class="spacer-bottom"></div>
-    </section>
-
-    <!-- SCREEN 14 — RITUAL -->
-    <section class="screen" data-screen="14">
-      <div class="spacer-top"></div>
-      <div class="ritual">
-        <div class="ritual-symbol">✦</div>
-        <div class="ritual-title">CONSULTANDO LAS PALABRAS</div>
-        <div class="ritual-status" id="ritualStatus">Iniciando el filtro ancestral…</div>
-        <div class="ritual-progress">
-          <div class="ritual-progress-fill" id="ritualProgress"></div>
-        </div>
-      </div>
-      <div class="spacer-bottom"></div>
-    </section>
-
-   
+<div class="header">
+  <button class="back-btn" id="backBtn" aria-label="Voltar">←</button>
+  <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+    <div class="progress-fill" id="progressFill"></div>
   </div>
+</div>
 
-  <!-- Micro-feedback toast -->
-  <div class="micro-feedback" id="microFeedback"></div>
+<!-- SCREEN 1 — GÉNERO -->
+<section class="screen active" data-screen="1">
+  <div class="spacer-top"></div>
+  <div class="ornament">✦ · ✦</div>
+  <h1 class="question">Has sido convocado a la prueba de <span class="hl">la prosperidad</span></h1>
+  <p class="question-sub">Las palabras necesitan saber: tú eres…</p>
+  <div class="opt-grid">
+    <button class="opt-card" data-answer="hombre" data-label="Hombre">
+      <div class="opt-card-img" style="background-image:url('images/hombre.webp');"></div>
+      <div class="opt-card-label">Hombre</div>
+    </button>
+    <button class="opt-card" data-answer="mujer" data-label="Mujer">
+      <div class="opt-card-img" style="background-image:url('images/mujer.webp');"></div>
+      <div class="opt-card-label">Mujer</div>
+    </button>
+  </div>
+  <div class="spacer-bottom"></div>
+</section>
 
-  <script>
-    const CONFIG = {
-      WEBHOOK_URL: '',
-      FINAL_URL: '',
-      PASS_ANSWERS_AS_QUERY: true,
-      RITUAL_DURATION_MS: 3500
-    };
+<!-- SCREEN 2 — EDAD -->
+<section class="screen" data-screen="2">
+  <div class="spacer-top"></div>
+  <h1 class="question">¿Cuál es tu edad?</h1>
+  <div class="options">
+    <button class="opt" data-answer="18-24" data-label="18–24 años">18–24</button>
+    <button class="opt" data-answer="25-34" data-label="25–34 años">25–34</button>
+    <button class="opt" data-answer="35-44" data-label="35–44 años">35–44</button>
+    <button class="opt" data-answer="45+" data-label="45 años o más">45+</button>
+  </div>
+  <div class="spacer-bottom"></div>
+</section>
 
-    const TOTAL_SCREENS = 15;
-    let currentScreen = 1;
-    const answers = {};
-    const answerLabels = {};
-    const multiSelections = new Set();
+<!-- SCREEN 3 — DINERO -->
+<section class="screen" data-screen="3">
+  <div class="spacer-top"></div>
+  <h1 class="question">Cuando el dinero entra en tu vida, ¿qué sucede inmediatamente después?</h1>
+  <div class="options">
+    <button class="opt" data-answer="prueba-gasto" data-label="aparece una prueba o un gasto inesperado">
+      <span class="icon">📖</span><span>Siempre aparece una prueba o un gasto inesperado</span>
+    </button>
+    <button class="opt" data-answer="desaparece" data-label="el dinero desaparece sin entender cómo">
+      <span class="icon">🕯️</span><span>Desaparece sin que logre entender cómo</span>
+    </button>
+    <button class="opt" data-answer="miedo-usar" data-label="permanece, pero sientes miedo de usarlo">
+      <span class="icon">🙌🏻</span><span>Permanece intacto, pero siento miedo de usarlo</span>
+    </button>
+    <button class="opt" data-answer="multiplica" data-label="el dinero se multiplica naturalmente">
+      <span class="icon">🙏🏼</span><span>Se multiplica de manera natural y armoniosa</span>
+    </button>
+  </div>
+  <div class="spacer-bottom"></div>
+</section>
 
-    const BLOCK_MAP = {
-      'no-merezco': { name: 'El Sello de la Indignidad', desc: 'Una voz interior te repite que no eres digno de recibir. Las palabras existen para silenciarla.' },
-      'ansioso':    { name: 'El Sello del Temor', desc: 'Recibes, pero el miedo de perder consume lo recibido. Las palabras enseñan a portar sin temblar.' },
-      'culpable':   { name: 'El Sello de la Culpa Heredada', desc: 'Cargas una culpa que no es tuya — viene de generaciones atrás. Las palabras la rompen.' },
-      'mio':        { name: 'El Sello del Reconocimiento', desc: 'Ya sabes que la abundancia te pertenece. Las palabras solo aceleran lo que tu frecuencia ya invocó.' }
-    };
+<!-- SCREEN 4 — LEY DE LA ATRACCIÓN -->
+<section class="screen" data-screen="4">
+  <div class="spacer-top"></div>
+  <h1 class="question">¿Ya intentaste la Ley de la Atracción, el pensamiento positivo o la manifestación?</h1>
+  <div class="options">
+    <button class="opt" data-answer="nunca-funciono" data-label="lo intentaste varias veces sin éxito">Sí, varias veces y NUNCA funcionó bien</button>
+    <button class="opt" data-answer="temporales" data-label="los resultados fueron temporales">Lo intenté, pero los resultados fueron temporales</button>
+    <button class="opt" data-answer="nunca-intente" data-label="nunca lo intentaste seriamente">Nunca lo intenté seriamente</button>
+    <button class="opt" data-answer="funciono" data-label="funcionó perfectamente para ti">Funcionó perfectamente para mí</button>
+  </div>
+  <div class="spacer-bottom"></div>
+</section>
 
-    function applyAdaptations(n) {
-      if (n === 6) {
-        const q = document.getElementById('screen6Quote');
-        if (answerLabels[3] && q) q.textContent = answerLabels[3];
-        else document.getElementById('screen6Text').innerHTML = 'Lo que respondiste no es casualidad.';
-      }
-      if (n === 8) {
-        const b = BLOCK_MAP[answers[7]] || BLOCK_MAP['no-merezco'];
-        document.getElementById('blockName').textContent = b.name;
-        document.getElementById('blockDesc').textContent = b.desc;
-      }
-      if (n === 11) {
-        const q = document.getElementById('screen11Quote');
-        if (answerLabels[10] && q) q.textContent = answerLabels[10];
-        else document.getElementById('screen11Sub').textContent = 'Y reconocen tu deseo más profundo.';
-      }
-      if (n === 14) startRitual();
-    }
+<!-- SCREEN 5 — POR QUÉ ALGUIEN -->
+<section class="screen" data-screen="5">
+  <div class="spacer-top"></div>
+  <h1 class="question">¿Alguna vez te has preguntado:</h1>
+  <p class="question-sub">"¿Por qué alguien que trabaja menos tiene más que yo?"</p>
+  <div class="options">
+    <button class="opt" data-answer="frustra" data-label="te frustra profundamente">Sí, eso me frustra profundamente</button>
+    <button class="opt" data-answer="a-veces" data-label="a veces lo piensas">A veces pienso en eso</button>
+    <button class="opt" data-answer="rara-vez" data-label="rara vez">Rara vez</button>
+    <button class="opt" data-answer="nunca" data-label="nunca">Nunca</button>
+  </div>
+  <div class="spacer-bottom"></div>
+</section>
 
-    const RITUAL_MESSAGES = [
-      'Iniciando el filtro ancestral…',
-      'Cruzando tu respuesta con los 150 versos del salmo prohibido…',
-      'Confirmando tu firma energética…',
-      'Solo 3 de cada 10 personas pasan este filtro…',
-      'Sellando el reconocimiento…'
-    ];
+<!-- SCREEN 6 — TRANSITION -->
+<section class="screen" data-screen="6">
+  <div class="spacer-top"></div>
+  <div class="transition">
+    <div class="ornament">✦</div>
+    <div class="transition-img" style="background-image:url('images/mercado.webp');"></div>
+    <p class="transition-text" id="screen6Text">
+      Tu respuesta — <span class="quoted-answer" id="screen6Quote">[…]</span> — no es casualidad.
+    </p>
+    <p class="transition-sub">Las personas que prosperan sin esfuerzo conocen <b style="color:var(--accent-hover);font-style:normal;">frecuencias</b> que la mayoría jamás escuchó.</p>
+    <button class="cta pulse" data-next>Continuar</button>
+  </div>
+  <div class="spacer-bottom"></div>
+</section>
 
-    function startRitual() {
-      const statusEl = document.getElementById('ritualStatus');
-      const progressEl = document.getElementById('ritualProgress');
-      const dur = CONFIG.RITUAL_DURATION_MS;
-      const step = dur / RITUAL_MESSAGES.length;
-      let i = 0;
-      statusEl.textContent = RITUAL_MESSAGES[0];
-      progressEl.style.width = '0%';
-      setTimeout(() => { progressEl.style.transition = `width ${dur}ms linear`; progressEl.style.width = '100%'; }, 50);
-      const iv = setInterval(() => {
-        i++;
-        if (i >= RITUAL_MESSAGES.length) { clearInterval(iv); setTimeout(() => showScreen(15), 400); return; }
-        statusEl.style.opacity = '0';
-        setTimeout(() => { statusEl.textContent = RITUAL_MESSAGES[i]; statusEl.style.opacity = '1'; }, 300);
-      }, step);
-    }
+<!-- SCREEN 7 — CUANDO PIENSO EN DINERO -->
+<section class="screen" data-screen="7">
+  <div class="spacer-top"></div>
+  <h1 class="question">Cuando piensas en tener mucho dinero, tú…</h1>
+  <div class="options">
+    <button class="opt" data-answer="no-merezco" data-label="sientes que no lo mereces">
+      <span class="icon">😟</span><span>Siento que no lo merezco o que no soy capaz</span>
+    </button>
+    <button class="opt" data-answer="ansioso" data-label="te pones ansioso(a) por perderlo">
+      <span class="icon">😳</span><span>Me pongo ansioso(a) y tengo miedo de perderlo</span>
+    </button>
+    <button class="opt" data-answer="culpable" data-label="te sientes culpable por desearlo">
+      <span class="icon">😔</span><span>Me siento culpable por desearlo</span>
+    </button>
+    <button class="opt" data-answer="mio" data-label="sabes que es tuyo por derecho">
+      <span class="icon">😌</span><span>Sé que es mío por derecho</span>
+    </button>
+  </div>
+  <div class="spacer-bottom"></div>
+</section>
 
-    function showMicroFeedback(text) {
-      if (!text) return;
-      const el = document.getElementById('microFeedback');
-      el.textContent = text;
-      el.classList.add('show');
-      setTimeout(() => el.classList.remove('show'), 1800);
-    }
+<!-- SCREEN 8 — DIAGNÓSTICO -->
+<section class="screen" data-screen="8">
+  <div class="spacer-top"></div>
+  <div class="transition">
+    <div class="alert-banner">Tu respuesta reveló tu bloqueo principal</div>
+    <div class="transition-img" style="background-image:url('images/bloqueo.webp');"></div>
+    <div class="diagnosis">
+      <div class="diagnosis-label">Bloqueo identificado</div>
+      <div class="diagnosis-name" id="blockName">El Sello de la Indignidad</div>
+      <div class="diagnosis-desc" id="blockDesc">Una voz interior te repite que no eres digno. Las palabras existen para silenciarla.</div>
+    </div>
+    <button class="cta pulse" data-next>Continuar</button>
+  </div>
+  <div class="spacer-bottom"></div>
+</section>
 
-    const progressFill = document.getElementById('progressFill');
-    const backBtn = document.getElementById('backBtn');
-    const screens = document.querySelectorAll('.screen');
+<!-- SCREEN 9 — SALMO -->
+<section class="screen" data-screen="9">
+  <div class="spacer-top"></div>
+  <h1 class="question">¿Y si te dijera que una oración del salmo prohibido puede cambiar tu realidad financiera en 40 días?</h1>
+  <p class="question-sub" style="font-size:19px;">Tú…</p>
+  <div class="options">
+    <button class="opt" data-answer="inmediato" data-label="la intentarías de inmediato">
+      <span class="icon">🥳</span><span>La intentaría de inmediato</span>
+    </button>
+    <button class="opt" data-answer="curiosidad" data-label="sentirías mucha curiosidad">
+      <span class="icon">🥺</span><span>Sentiría mucha curiosidad por saber más</span>
+    </button>
+    <button class="opt" data-answer="entender" data-label="necesitarías entender cómo funciona primero">
+      <span class="icon">✨</span><span>Necesitaría entender primero cómo funciona</span>
+    </button>
+  </div>
+  <div class="spacer-bottom"></div>
+</section>
 
-    let vturbLoaded = false;
-    function loadVturbPlayer() {
-      if (vturbLoaded) return;
-      vturbLoaded = true;
-      const s = document.createElement('script');
-      s.src = 'https://scripts.converteai.net/ce326748-7ad9-45d3-b1c0-ccc0fba77476/players/6a2dd817523d570c096dad37/v4/player.js';
-      s.async = true;
-      document.head.appendChild(s);
-    }
+<!-- SCREEN 10 — MAYOR DESEO -->
+<section class="screen" data-screen="10">
+  <div class="spacer-top"></div>
+  <h1 class="question">¿Cuál es tu mayor deseo en este momento?</h1>
+  <div class="options">
+    <button class="opt" data-answer="deudas" data-label="pagar todas tus deudas">Pagar todas mis deudas</button>
+    <button class="opt" data-answer="emergencia" data-label="tener un fondo de emergencia">Tener un fondo de emergencia</button>
+    <button class="opt" data-answer="libertad" data-label="alcanzar la libertad financiera">Alcanzar la libertad financiera</button>
+    <button class="opt" data-answer="familia" data-label="ayudar a tu familia">Ayudar a mi familia</button>
+  </div>
+  <div class="spacer-bottom"></div>
+</section>
 
-    function showScreen(n) {
-      currentScreen = n;
-      screens.forEach(s => s.classList.toggle('active', parseInt(s.dataset.screen) === n));
-      const pct = Math.min((n / 13) * 100, 100);
-      progressFill.style.width = pct + '%';
-      progressFill.parentElement.setAttribute('aria-valuenow', Math.round(pct));
-      backBtn.disabled = (n === 1 || n === 14 || n === 15);
-      window.scrollTo({ top: 0, behavior: 'instant' });
-      applyAdaptations(n);
-      if (n === 15) {
-        loadVturbPlayer();
-        const cta = document.getElementById('finalCta');
-        if (cta && !cta.dataset.timerSet) {
-          cta.dataset.timerSet = '1';
-          setTimeout(() => { cta.style.display = 'block'; }, 262000);
-        }
-      }
-    }
+<!-- SCREEN 11 — TRANSITION -->
+<section class="screen" data-screen="11">
+  <div class="spacer-top"></div>
+  <div class="transition">
+    <div class="ornament">✦</div>
+    <div class="transition-img" style="background-image:url('images/palabras.webp');"></div>
+    <p class="transition-text">Las <b>palabras</b> reconocen a quien las puede portar.</p>
+    <p class="transition-sub" id="screen11Sub">Y reconocen tu deseo: <span class="quoted-answer" id="screen11Quote">[…]</span>.</p>
+    <button class="cta pulse" data-next>Continuar</button>
+  </div>
+  <div class="spacer-bottom"></div>
+</section>
 
-    function next() { if (currentScreen < TOTAL_SCREENS) showScreen(currentScreen + 1); }
-    function back() { if (currentScreen > 1) showScreen(currentScreen - 1); }
+<!-- SCREEN 12 — MULTI-SELECT -->
+<section class="screen" data-screen="12">
+  <h1 class="question" style="margin-top:14px;">Marca lo que más deseas manifestar en los próximos 30 días:</h1>
+  <p class="question-sub" style="font-style:normal;font-size:13px;font-family:var(--sans);color:var(--text-faded);letter-spacing:1px;">(SELECCIÓN MÚLTIPLE)</p>
+  <div class="opt-grid" id="multiGrid">
+    <button class="opt-check" data-value="abundancia"><span class="checkbox"></span><span>Abundancia financiera</span></button>
+    <button class="opt-check" data-value="paz"><span class="checkbox"></span><span>Paz interior</span></button>
+    <button class="opt-check" data-value="alegria"><span class="checkbox"></span><span>Alegría</span></button>
+    <button class="opt-check" data-value="motivacion"><span class="checkbox"></span><span>Motivación</span></button>
+    <button class="opt-check" data-value="confianza"><span class="checkbox"></span><span>Confianza</span></button>
+    <button class="opt-check" data-value="relaciones"><span class="checkbox"></span><span>Relaciones saludables</span></button>
+    <button class="opt-check" data-value="proposito"><span class="checkbox"></span><span>Propósito</span></button>
+    <button class="opt-check" data-value="gratitud"><span class="checkbox"></span><span>Gratitud</span></button>
+    <button class="opt-check" data-value="claridad"><span class="checkbox"></span><span>Claridad mental</span></button>
+    <button class="opt-check" data-value="positivos"><span class="checkbox"></span><span>Pensamientos positivos</span></button>
+    <button class="opt-check" data-value="salud"><span class="checkbox"></span><span>Salud física</span></button>
+    <button class="opt-check" data-value="enfoque"><span class="checkbox"></span><span>Enfoque</span></button>
+    <button class="opt-check" data-value="evolucion"><span class="checkbox"></span><span>Evolución personal</span></button>
+    <button class="opt-check" data-value="productividad"><span class="checkbox"></span><span>Productividad</span></button>
+    <button class="opt-check" data-value="manifestacion"><span class="checkbox"></span><span>Manifestación de deseos</span></button>
+    <button class="opt-check" data-value="paciencia"><span class="checkbox"></span><span>Paciencia</span></button>
+  </div>
+  <button class="cta cta-muted" id="multiNext" style="margin-top:18px;">Continuar</button>
+</section>
 
-    backBtn.addEventListener('click', back);
+<!-- SCREEN 13 — COMPROMISO -->
+<section class="screen" data-screen="13">
+  <div class="spacer-top"></div>
+  <p class="notice"><span class="hl">Aviso:</span> las palabras tienen conciencia propia. Pueden volverse contra quien las utiliza con mala intención.</p>
+  <div class="transition-img" style="background-image:url('images/torah.webp');margin:0 auto 22px;"></div>
+  <h1 class="question" style="font-size:22px;">¿Te comprometes a usar este poder únicamente con propósitos nobles?</h1>
+  <div class="options">
+    <button class="opt" data-answer="si-comprometo" data-label="te comprometiste completamente">
+      <span class="icon">🙏🏼</span><span>Sí, me comprometo completamente</span><span class="arrow">›</span>
+    </button>
+    <button class="opt" data-answer="no-garantizo" data-label="no pudiste garantizarlo">
+      <span class="icon">🙌</span><span>No puedo garantizarlo</span><span class="arrow">›</span>
+    </button>
+  </div>
+  <div class="spacer-bottom"></div>
+</section>
 
-    document.querySelectorAll('.opt[data-answer], .opt-card[data-answer]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const screenEl = btn.closest('.screen');
-        const sn = parseInt(screenEl.dataset.screen);
-        answers[sn] = btn.dataset.answer;
-        answerLabels[sn] = btn.dataset.label || btn.dataset.answer;
-        screenEl.querySelectorAll('.opt, .opt-card').forEach(b => b.classList.remove('selected'));
-        btn.classList.add('selected');
-        setTimeout(next, 280);
-      });
-    });
+<!-- SCREEN 14 — RITUAL -->
+<section class="screen" data-screen="14">
+  <div class="spacer-top"></div>
+  <div class="ritual">
+    <div class="ritual-symbol">✦</div>
+    <div class="ritual-title">CONSULTANDO LAS PALABRAS</div>
+    <div class="ritual-status" id="ritualStatus">Iniciando el filtro ancestral…</div>
+    <div class="ritual-progress">
+      <div class="ritual-progress-fill" id="ritualProgress"></div>
+    </div>
+  </div>
+  <div class="spacer-bottom"></div>
+</section>
 
-    document.querySelectorAll('[data-next]').forEach(btn => btn.addEventListener('click', next));
+<!-- SCREEN 15 — FINAL -->
+<section class="screen" data-screen="15">
+  <h1 style="font-family:var(--serif);font-size:26px;font-weight:600;text-align:center;color:var(--accent);margin:24px 0 10px;line-height:1.25;">Felicidades, Tu Alma Ha Sido Aprobada</h1>
+  <p style="font-family:var(--sans);font-size:16px;text-align:center;color:var(--text);margin:0 auto 22px;max-width:400px;line-height:1.45;opacity:.9;">Escucha ahora lo que te falta para liberarte de las cadenas de la escasez</p>
+  <vturb-smartplayer id="vid-6a2dd817523d570c096dad37" style="display: block; margin: 0 auto; width: 100%; max-width: 400px;"></vturb-smartplayer>
+  <a href="https://pay.hotmart.com/E106062672Q?off=c5nsp79j&checkoutMode=10" id="finalCta" class="smartplayer-scroll-event" style="text-decoration:none;display:none;margin:22px auto 0;max-width:400px;">
+    <button class="cta pulse smartplayer-scroll-event" style="width:100%;font-size:17px;">✦ Quiero Desbloquear la Abundancia</button>
+  </a>
+</section>
 
-    document.querySelectorAll('#multiGrid .opt-check').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const val = btn.dataset.value;
-        if (multiSelections.has(val)) { multiSelections.delete(val); btn.classList.remove('selected'); }
-        else { multiSelections.add(val); btn.classList.add('selected'); }
-      });
-    });
 
-    document.getElementById('multiNext').addEventListener('click', () => {
-      if (multiSelections.size === 0) { showMicroFeedback('Selecciona al menos una opción para continuar'); return; }
-      answers[12] = Array.from(multiSelections);
-      next();
-    });
+ </div> <!-- Micro-feedback toast --> <div class="micro-feedback" id="microFeedback"></div> <script> const CONFIG = { WEBHOOK_URL: '', FINAL_URL: '', PASS_ANSWERS_AS_QUERY: true, RITUAL_DURATION_MS: 3500 }; const TOTAL_SCREENS = 15; let currentScreen = 1; const answers = {}; const answerLabels = {}; const multiSelections = new Set(); const BLOCK_MAP = { 'no-merezco': { name: 'El Sello de la Indignidad', desc: 'Una voz interior te repite que no eres digno de recibir. Las palabras existen para silenciarla.' }, 'ansioso': { name: 'El Sello del Temor', desc: 'Recibes, pero el miedo de perder consume lo recibido. Las palabras enseñan a portar sin temblar.' }, 'culpable': { name: 'El Sello de la Culpa Heredada', desc: 'Cargas una culpa que no es tuya — viene de generaciones atrás. Las palabras la rompen.' }, 'mio': { name: 'El Sello del Reconocimiento', desc: 'Ya sabes que la abundancia te pertenece. Las palabras solo aceleran lo que tu frecuencia ya invocó.' } }; function applyAdaptations(n) { if (n === 6) { const q = document.getElementById('screen6Quote'); if (answerLabels[3] && q) q.textContent = answerLabels[3]; else document.getElementById('screen6Text').innerHTML = 'Lo que respondiste no es casualidad.'; } if (n === 8) { const b = BLOCK_MAP[answers[7]] || BLOCK_MAP['no-merezco']; document.getElementById('blockName').textContent = b.name; document.getElementById('blockDesc').textContent = b.desc; } if (n === 11) { const q = document.getElementById('screen11Quote'); if (answerLabels[10] && q) q.textContent = answerLabels[10]; else document.getElementById('screen11Sub').textContent = 'Y reconocen tu deseo más profundo.'; } if (n === 14) startRitual(); } const RITUAL_MESSAGES = [ 'Iniciando el filtro ancestral…', 'Cruzando tu respuesta con los 150 versos del salmo prohibido…', 'Confirmando tu firma energética…', 'Solo 3 de cada 10 personas pasan este filtro…', 'Sellando el reconocimiento…' ]; function startRitual() { const statusEl = document.getElementById('ritualStatus'); const progressEl = document.getElementById('ritualProgress'); const dur = CONFIG.RITUAL_DURATION_MS; const step = dur / RITUAL_MESSAGES.length; let i = 0; statusEl.textContent = RITUAL_MESSAGES[0]; progressEl.style.width = '0%'; setTimeout(() => { progressEl.style.transition = `width ${dur}ms linear`; progressEl.style.width = '100%'; }, 50); const iv = setInterval(() => { i++; if (i >= RITUAL_MESSAGES.length) { clearInterval(iv); setTimeout(() => showScreen(15), 400); return; } statusEl.style.opacity = '0'; setTimeout(() => { statusEl.textContent = RITUAL_MESSAGES[i]; statusEl.style.opacity = '1'; }, 300); }, step); } function showMicroFeedback(text) { if (!text) return; const el = document.getElementById('microFeedback'); el.textContent = text; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 1800); } const progressFill = document.getElementById('progressFill'); const backBtn = document.getElementById('backBtn'); const screens = document.querySelectorAll('.screen'); let vturbLoaded = false; function loadVturbPlayer() { if (vturbLoaded) return; vturbLoaded = true; const s = document.createElement('script'); s.src = 'https://scripts.converteai.net/ce326748-7ad9-45d3-b1c0-ccc0fba77476/players/6a2dd817523d570c096dad37/v4/player.js'; s.async = true; document.head.appendChild(s); } function showScreen(n) { currentScreen = n; screens.forEach(s => s.classList.toggle('active', parseInt(s.dataset.screen) === n)); const pct = Math.min((n / 13) * 100, 100); progressFill.style.width = pct + '%'; progressFill.parentElement.setAttribute('aria-valuenow', Math.round(pct)); backBtn.disabled = (n === 1 || n === 14 || n === 15); window.scrollTo({ top: 0, behavior: 'instant' }); applyAdaptations(n); if (n === 15) { loadVturbPlayer(); const cta = document.getElementById('finalCta'); if (cta && !cta.dataset.timerSet) { cta.dataset.timerSet = '1'; setTimeout(() => { cta.style.display = 'block'; }, 262000); } } } function next() { if (currentScreen < TOTAL_SCREENS) showScreen(currentScreen + 1); } function back() { if (currentScreen > 1) showScreen(currentScreen - 1); } backBtn.addEventListener('click', back); document.querySelectorAll('.opt[data-answer], .opt-card[data-answer]').forEach(btn => { btn.addEventListener('click', () => { const screenEl = btn.closest('.screen'); const sn = parseInt(screenEl.dataset.screen); answers[sn] = btn.dataset.answer; answerLabels[sn] = btn.dataset.label || btn.dataset.answer; screenEl.querySelectorAll('.opt, .opt-card').forEach(b => b.classList.remove('selected')); btn.classList.add('selected'); setTimeout(next, 280); }); }); document.querySelectorAll('[data-next]').forEach(btn => btn.addEventListener('click', next)); document.querySelectorAll('#multiGrid .opt-check').forEach(btn => { btn.addEventListener('click', () => { const val = btn.dataset.value; if (multiSelections.has(val)) { multiSelections.delete(val); btn.classList.remove('selected'); } else { multiSelections.add(val); btn.classList.add('selected'); } }); }); document.getElementById('multiNext').addEventListener('click', () => { if (multiSelections.size === 0) { showMicroFeedback('Selecciona al menos una opción para continuar'); return; } answers[12] = Array.from(multiSelections); next(); }); // Captura todos os parâmetros da URL atual (UTMs, fbclid, gclid, etc.) const INCOMING_PARAMS = new URLSearchParams(window.location.search); // Helper: anexa todos os parâmetros recebidos a qualquer URL externa function withForwardedParams(url) { if (!url || url.startsWith('#')) return url; try { const u = new URL(url, window.location.origin); INCOMING_PARAMS.forEach((value, key) => { if (!u.searchParams.has(key)) u.searchParams.set(key, value); }); return u.toString(); } catch (_) { // Fallback caso URL não parseie const qs = INCOMING_PARAMS.toString(); if (!qs) return url; return url + (url.includes('?') ? '&' : '?') + qs; } } // Aplica forward em TODOS os links externos da página automaticamente document.querySelectorAll('a[href^="http"], a[href^="//"]').forEach(a => { const original = a.getAttribute('href'); a.setAttribute('href', withForwardedParams(original)); }); document.getElementById('finalCta')?.addEventListener('click', (e) => { // Meta Pixel — InitiateCheckout com event_id pra deduplicação com CAPI const eventId = 'ic_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10); if (typeof fbq === 'function') { fbq('track', 'InitiateCheckout', { content_name: 'Salmos Prohibidos', content_category: 'Religion', currency: 'USD', value: 15.90 }, { eventID: eventId }); } if (CONFIG.WEBHOOK_URL) fetch(CONFIG.WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(answers) }).catch(() => {}); let target = CONFIG.FINAL_URL || e.currentTarget.getAttribute('href'); if (target && !target.startsWith('#')) { // 1) Adiciona as respostas do quiz if (CONFIG.PASS_ANSWERS_AS_QUERY) { const p = new URLSearchParams(); Object.entries(answers).forEach(([k, v]) => p.append('q' + k, Array.isArray(v) ? v.join(',') : v)); const qs = p.toString(); if (qs) target += (target.includes('?') ? '&' : '?') + qs; } // 2) Adiciona o event_id da deduplicação (pra usar depois na CAPI server-side) target += (target.includes('?') ? '&' : '?') + 'event_id=' + encodeURIComponent(eventId); // 3) Força a propagação de TODOS os parâmetros da URL atual (UTMs, fbclid, etc.) target = withForwardedParams(target); e.preventDefault(); window.location.href = target; return; } if (!target || target.startsWith('#')) { e.preventDefault(); alert('Configura CONFIG.FINAL_URL.'); } }); showScreen(1); </script> <!-- Microsoft Clarity --> <script type="text/javascript"> (function(c,l,a,r,i,t,y){ c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)}; t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i; y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y); })(window, document, "clarity", "script", "x3ejegvfxz"); </script> <!-- Utmify Pixel --> <script> window.pixelId = "6a24c07d06a0af9e72870b5a"; var a = document.createElement("script"); a.setAttribute("async", ""); a.setAttribute("defer", ""); a.setAttribute("src", "https://cdn.utmify.com.br/scripts/pixel/pixel.js"); document.head.appendChild(a); </script> <!-- Utmify UTMs --> <script src="https://cdn.utmify.com.br/scripts/utms/latest.js" data-utmify-prevent-subids async defer ></script> <!-- Meta Pixel --> <script> !function(f,b,e,v,n,t,s) {if(f.fbq)return;n=f.fbq=function(){n.callMethod? n.callMethod.apply(n,arguments):n.queue.push(arguments)}; if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0'; n.queue=[];t=b.createElement(e);t.async=!0; t.src=v;s=b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t,s)}(window,document,'script', 'https://connect.facebook.net/en_US/fbevents.js'); fbq('init','1358378676176848'); fbq('track','PageView'); </script> 
 
-    // Captura todos os parâmetros da URL atual (UTMs, fbclid, gclid, etc.)
-    const INCOMING_PARAMS = new URLSearchParams(window.location.search);
+<noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1358378676176848&ev=PageView&noscript=1"/></noscript>
 
-    // Helper: anexa todos os parâmetros recebidos a qualquer URL externa
-    function withForwardedParams(url) {
-      if (!url || url.startsWith('#')) return url;
-      try {
-        const u = new URL(url, window.location.origin);
-        INCOMING_PARAMS.forEach((value, key) => {
-          if (!u.searchParams.has(key)) u.searchParams.set(key, value);
-        });
-        return u.toString();
-      } catch (_) {
-        // Fallback caso URL não parseie
-        const qs = INCOMING_PARAMS.toString();
-        if (!qs) return url;
-        return url + (url.includes('?') ? '&' : '?') + qs;
-      }
-    }
-
-    // Aplica forward em TODOS os links externos da página automaticamente
-    document.querySelectorAll('a[href^="http"], a[href^="//"]').forEach(a => {
-      const original = a.getAttribute('href');
-      a.setAttribute('href', withForwardedParams(original));
-    });
-
-    document.getElementById('finalCta')?.addEventListener('click', (e) => {
-      // Meta Pixel — InitiateCheckout com event_id pra deduplicação com CAPI
-      const eventId = 'ic_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10);
-      if (typeof fbq === 'function') {
-        fbq('track', 'InitiateCheckout', {
-          content_name: 'Salmos Prohibidos',
-          content_category: 'Religion',
-          currency: 'USD',
-          value: 15.90
-        }, { eventID: eventId });
-      }
-
-      if (CONFIG.WEBHOOK_URL) fetch(CONFIG.WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(answers) }).catch(() => {});
-      let target = CONFIG.FINAL_URL || e.currentTarget.getAttribute('href');
-      if (target && !target.startsWith('#')) {
-        // 1) Adiciona as respostas do quiz
-        if (CONFIG.PASS_ANSWERS_AS_QUERY) {
-          const p = new URLSearchParams();
-          Object.entries(answers).forEach(([k, v]) => p.append('q' + k, Array.isArray(v) ? v.join(',') : v));
-          const qs = p.toString();
-          if (qs) target += (target.includes('?') ? '&' : '?') + qs;
-        }
-        // 2) Adiciona o event_id da deduplicação (pra usar depois na CAPI server-side)
-        target += (target.includes('?') ? '&' : '?') + 'event_id=' + encodeURIComponent(eventId);
-        // 3) Força a propagação de TODOS os parâmetros da URL atual (UTMs, fbclid, etc.)
-        target = withForwardedParams(target);
-        e.preventDefault();
-        window.location.href = target;
-        return;
-      }
-      if (!target || target.startsWith('#')) { e.preventDefault(); alert('Configura CONFIG.FINAL_URL.'); }
-    });
-
-    showScreen(1);
-  </script>
-
-  <!-- Microsoft Clarity -->
-  <script type="text/javascript">
-    (function(c,l,a,r,i,t,y){
-      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-    })(window, document, "clarity", "script", "x3ejegvfxz");
-  </script>
-
-  <!-- Utmify Pixel -->
-  <script>
-    window.pixelId = "6a24c07d06a0af9e72870b5a";
-    var a = document.createElement("script");
-    a.setAttribute("async", "");
-    a.setAttribute("defer", "");
-    a.setAttribute("src", "https://cdn.utmify.com.br/scripts/pixel/pixel.js");
-    document.head.appendChild(a);
-  </script>
-
-  <!-- Utmify UTMs -->
-<script
-  src="https://cdn.utmify.com.br/scripts/utms/latest.js"
-  data-utmify-prevent-subids
-  async
-  defer
-></script>
-  <!-- Meta Pixel -->
-  <script>
-    !function(f,b,e,v,n,t,s)
-    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-    n.queue=[];t=b.createElement(e);t.async=!0;
-    t.src=v;s=b.getElementsByTagName(e)[0];
-    s.parentNode.insertBefore(t,s)}(window,document,'script',
-    'https://connect.facebook.net/en_US/fbevents.js');
-    fbq('init','1358378676176848');
-    fbq('track','PageView');
-  </script>
-  <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1358378676176848&ev=PageView&noscript=1"/></noscript>
-
-</body>
-</html>
+ </body> </html>
